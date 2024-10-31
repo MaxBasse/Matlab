@@ -1,0 +1,170 @@
+%% step 1: creating the test enviroment
+
+%rng(106); % choose another number for different initial condition
+
+ObsInfo = rlNumericSpec([5 1]);
+ObsInfo.Name = "Glider States";
+ObsInfo.Description = 'x, y, v, theta, wing';
+
+ActInfo = rlFiniteSetSpec([1 2 3 4 5 6 7]);
+ActInfo.Name = "Glider Action";
+
+testenv = rlFunctionEnv(ObsInfo,ActInfo,"GliderStepFunction","GliderResetFunction");
+
+%% step 2: loading an existing agent and running a simulation
+
+stepnumber=2000;
+simOptions = rlSimulationOptions(MaxSteps=stepnumber);
+
+% load agentB.mat
+% experience1 = sim(testenv,agentB,simOptions);
+% totalReward1 = sum(experience1.Reward)
+
+%load agentA2.mat
+%experience2 = sim(testenv,agentA2,simOptions);
+%totalReward2 = sum(experience2.Reward)
+
+%% step 2(bis) : creating an agent and running a simulation
+
+stepnumber=2000;
+simOptions = rlSimulationOptions(MaxSteps=stepnumber);
+
+% agent
+obsInfo = getObservationInfo(testenv);
+actInfo = getActionInfo(testenv);
+
+dnn = [
+    featureInputLayer(prod(obsInfo.Dimension))
+    fullyConnectedLayer(32)
+    reluLayer
+    %fullyConnectedLayer(32)% added
+    %reluLayer
+    fullyConnectedLayer(32)
+    reluLayer
+    fullyConnectedLayer(numel(actInfo.Elements))
+    ];
+
+dnn = dlnetwork(dnn);
+summary(dnn)
+
+% Plot network
+plot(dnn)
+
+critic = rlVectorQValueFunction(dnn,obsInfo,actInfo);
+%getValue(critic,{rand(obsInfo.Dimension)})%
+criticOptions = rlOptimizerOptions( ...
+    LearnRate=0.02);
+    % GradientThreshold=Inf,...
+    % Algorithm="adam",...
+    % GradientThresholdMethod="l2norm",...
+    % L2RegularizationFactor=0.0001
+    %,...OptimizerParameters=!?
+    
+agentOptions = rlDQNAgentOptions(...
+    SampleTime=1, ... %BatchDataRegularizerOptions=x,...
+    CriticOptimizerOptions=criticOptions,...
+    DiscountFactor=0.99,...
+    ExperienceBufferLength=1e+04,... %InfoToSave=x,...
+    MiniBatchSize=64,... %NumStepsToLookAhead=x,...%ResetExperienceBufferBeforeTraining=x,...%SequenceLength=32,...
+    TargetSmoothFactor=0.001,...
+    TargetUpdateFrequency=1,...
+    UseDoubleDQN=true);
+
+%agentOptions
+
+agent = rlDQNAgent(critic,agentOptions);
+agent.AgentOptions.EpsilonGreedyExploration.Epsilon = 1;
+agent.AgentOptions.EpsilonGreedyExploration.EpsilonDecay = 0.005;
+agent.AgentOptions.EpsilonGreedyExploration.EpsilonMin = 0.01;
+
+%getAction(agent,rand(obsInfo.Dimension))%
+
+experience1 = sim(testenv,agent,simOptions);
+totalReward1 = sum(experience1.Reward)
+
+%% step 3: reference solution with fixed wings
+
+refsol = zeros(4,stepnumber+1); % MaxSteps=10000
+refsol(:,1) = experience2.Observation.GliderStates.Data(1:4,1);
+
+g=9.81;
+h = 0.05;
+for j=1:stepnumber
+    refsol(:,j+1) =RK4(g,h,4,refsol(:,j));
+end
+
+%% step 4: plots
+
+figure
+% plot(experience1.Observation.GliderStates.Data(1,:),experience1.Observation.GliderStates.Data(2,:),'b')
+% hold on
+plot(experience2.Observation.GliderStates.Data(1,:),experience2.Observation.GliderStates.Data(2,:),'m')
+hold on
+% plot(experience3.Observation.GliderStates.Data(1,:),experience3.Observation.GliderStates.Data(2,:),'y')
+% hold on
+plot(refsol(1,:),refsol(2,:),'--r')
+xlabel('x')
+ylabel('y')
+hold off
+
+E_ref = g*refsol(2,end)+refsol(2,end)^2/2 % energy
+% E_agent1 = g*experience1.Observation.GliderStates.Data(2,end)+experience1.Observation.GliderStates.Data(2,end)^2/2
+E_agent2 = g*experience2.Observation.GliderStates.Data(2,end)+experience2.Observation.GliderStates.Data(2,end)^2/2
+% E_agent3 = g*experience3.Observation.GliderStates.Data(2,end)+experience3.Observation.GliderStates.Data(2,end)^2/2
+X_ref = refsol(1,end) % distance
+% X_agent1 = experience1.Observation.GliderStates.Data(1,end)
+X_agent2 = experience2.Observation.GliderStates.Data(1,end)
+% X_agent3 = experience3.Observation.GliderStates.Data(1,end)
+
+figure
+subplot(1,2,1)
+% plot(experience1.Reward,'b')
+% hold on
+plot(experience2.Reward,'m')
+% hold on
+% plot(experience3.Reward,'y')
+subplot(1,2,2)
+% plot(experience1.Action.GliderAction.Data(:),'b')
+% hold on
+plot(experience2.Action.GliderAction.Data(:),'m')
+% hold on
+% plot(experience3.Action.GliderAction.Data(:),'y')
+ylabel('action')
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%----------------------------------
+function NextState = RK4(g,h,Action,State)
+
+    Y1=State;
+    k1=rhs2(g,Action,Y1);
+    Y2=State+h/2*k1;
+    k2=rhs2(g,Action,Y2);
+    Y3=State+h/2*k2;
+    k3=rhs2(g,Action,Y3);
+    Y4=State+h*k3;
+    k4=rhs2(g,Action,Y4);
+    NextState=State+h*(k1+2*k2+2*k3+k4)/6;
+end
+%----------------------------------
+function dy = rhs2(g,Action,State)
+
+    Md=[1.3520e-04 % -5  deg
+        1.0848e-04 %  0  deg
+        1.0336e-04 %  2.5 deg
+        1.2752e-04 %  5  deg
+        1.8384e-04 %  7.5 deg
+        2.7936e-04 % 10 deg
+        6.2384e-04]; % 15 deg
+    Ml=[-0.0011
+        0.0077
+        0.0121
+        0.0164
+        0.0202
+        0.0229
+        0.0265];
+    dy = zeros(4,1);
+    
+    dy(1) = State(3)*cos(State(4));
+    dy(2) = State(3)*sin(State(4));
+    dy(3) = -g*sin(State(4)) - Md(Action)*State(3)^2;
+    dy(4) = -g*cos(State(4))/State(3) + Ml(Action)*State(3);
+end
