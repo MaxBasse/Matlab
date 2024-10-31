@@ -6,9 +6,9 @@ rng(106);%86 76
 % X
 X0 = 0;
 % Y rand
-Y0 = 100 + randi([-3,3])*10;
+Y0 = 60 + randi([-3,3])*10;
 % V rand
-V0 = 24.45 + (rand-1/2)*20; %randi([-1,1])*10
+V0 = 10 + (rand-1/2)*10; %randi([-1,1])*10
 % theta rand
 theta0 = randi([-9,9])*pi/36;
 % wing
