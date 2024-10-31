@@ -6,13 +6,15 @@ rng(106);%86 76
 % X
 X0 = 0;
 % Y rand
-Y0 = 100 + randi([-3,3])*10;
+Y0 = 50 + rand*20; %randi([-1,1])*10
 % V rand
 V0 = 24.45 + (rand-1/2)*20; %randi([-1,1])*10
 % theta rand
 theta0 = randi([-9,9])*pi/36;
 % wing
-wing0 = 2;
+wing0 = 4;
+% number of changes in wing angle
+% wch0 = 0;
 
 % Return initial environment state variables as logged signals.
 InitialState = [X0;Y0;V0;theta0;wing0];%;wch0
