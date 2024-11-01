@@ -66,5 +66,6 @@ agent.AgentOptions.EpsilonGreedyExploration.EpsilonMin = 0.01;
 %% step 3: training
 
 [Glider2,trainStats] = GliderTrain(agent,envA1);
-% saving the agent:
+
 save Glider2.mat Glider2
+

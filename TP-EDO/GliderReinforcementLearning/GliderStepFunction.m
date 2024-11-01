@@ -12,6 +12,7 @@ h=0.05;
 % y treshold for the glider i.e. it should never go under y = 0
 yTreshold = 0;
 
+
 % y maximum for the glider i.e it should stay under y=20
 yMaximum =20;
 
@@ -47,6 +48,7 @@ else
     PenaltyForCrashing = X^2;
 end
 
+
 % Perform RK4 to calculate next state.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 NextState = RK4_2(g,h,Action,State);
@@ -55,14 +57,28 @@ NextState = RK4_2(g,h,Action,State);
 NextObs = NextState;
 
 % Check terminal condition.
+
 IsDone = Y < yTreshold;
+
 
 % Calculate reward.
 if ~IsDone
-    Reward = RewardForLanding;
+    Reward = RewardForApproch
 else
-    Reward = PenaltyForCrashing;
+    
+    if Landed
+        if abs(X-xObjective)<100
+            Reward = 900000
+        end
+        Reward = RewardForLanding
+    end
+    if X > (xObjective+10)
+        Reward = PenaltyForCrashingX
+    else
+        Reward = PenaltyForCrashing
+    end
 end
+
 end
 %----------------------------------
 function NextState = RK4_2(g,h,Action,State)

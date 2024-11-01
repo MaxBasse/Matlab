@@ -8,7 +8,9 @@ function [newAgent,trainStats] = GliderTrain(agent,env)
 
 %% Create training options
 trainOptions = rlTrainingOptions();
+
 trainOptions.MaxEpisodes = 75;
+
 trainOptions.MaxStepsPerEpisode = 3000;
 trainOptions.ScoreAveragingWindowLength = 30;
 trainOptions.StopTrainingCriteria = "AverageReward";
