@@ -6,11 +6,13 @@ function [NextObs, Reward, IsDone, NextState] = GliderStepFunction(Action, State
 % Gravity
 g = 9.81;
 
+%Sample time
+h=0.05;
 % Drag coefficient
 drag = 1.5*10^(-4);
 
 % Lift coefficient
-lift = 0.0077
+lift = 0.0077;
 
 % y treshold for the glider i.e. the glider should never go under y = 0
 yTreshold = 0;
@@ -19,10 +21,10 @@ yTreshold = 0;
 xObjective = 300;
 
 % Reward each time step the glider is not landed yet
-distV = abs(State(3)-24.4572);
+%distV = abs(State(3)-24.4572);
 %distTheta = abs(State(4)+0.0078);
 RewardForLanding = ...
-    State(1)*(1-(5*distTheta+distV/5));
+    State(1)/(State(2)+0.001); %The smaller the altitude, bigger the reward
 % Penalty if the glider landed
 PenaltyForCrashing = -200000;
 
@@ -36,7 +38,7 @@ NextObs = NextState;
 % Check terminal condition.
 Y = NextObs(2);
 %Theta = NextObs(4);
-IsDone = Y < yThreshold
+IsDone = Y < yTreshold;
 
 % Calculate reward.
 if ~IsDone
@@ -61,7 +63,7 @@ function NextState = RK4_2(g,h,Action,State)
     NextState(5)=Action;
 end
 %----------------------------------
-function dy = rhs2(Action,State)
+function dy = rhs2(g,Action,State)
 
     Md=[1.3520e-04 % -5  deg
         1.0848e-04 %  0  deg
@@ -81,7 +83,7 @@ function dy = rhs2(Action,State)
     
     dy(1) = State(3)*cos(State(4));
     dy(2) = State(3)*sin(State(4));
-    dy(3) = -g*sin(State(4)) - Md(Action)*State(3)^2;
+    dy(3) = -g*sin(State(4)) - Md(A)*State(3)^2;
     dy(4) = -g*cos(State(4))/State(3) + Ml(Action)*State(3);
     dy(5) = 0;
 end

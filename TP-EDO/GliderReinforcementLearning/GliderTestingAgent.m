@@ -13,12 +13,12 @@ testenv = rlFunctionEnv(ObsInfo,ActInfo,"GliderStepFunction","GliderResetFunctio
 
 %% step 2: loading an existing agent and running a simulation
 
-%stepnumber=2000;
-%simOptions = rlSimulationOptions(MaxSteps=stepnumber);
+stepnumber=3000;
+simOptions = rlSimulationOptions(MaxSteps=stepnumber);
 
-% load agentB.mat
-% experience1 = sim(testenv,agentB,simOptions);
-% totalReward1 = sum(experience1.Reward)
+load Glider1.mat
+experience1 = sim(testenv,Glider1,simOptions);
+totalReward1 = sum(experience1.Reward);
 
 %load agentA2.mat
 %experience2 = sim(testenv,agentA2,simOptions);
@@ -26,8 +26,8 @@ testenv = rlFunctionEnv(ObsInfo,ActInfo,"GliderStepFunction","GliderResetFunctio
 
 %% step 2(bis) : creating an agent and running a simulation
 
-stepnumber=2000;
-simOptions = rlSimulationOptions(MaxSteps=stepnumber);
+%stepnumber=5000;
+%simOptions = rlSimulationOptions(MaxSteps=stepnumber);
 
 % agent
 obsInfo = getObservationInfo(testenv);
@@ -85,7 +85,7 @@ totalReward0 = sum(experience0.Reward);
 %% step 3: reference solution with fixed wings
 
 refsol = zeros(4,stepnumber+1); % MaxSteps=10000
-refsol(:,1) = experience0.Observation.GliderStates.Data(1:4,1);
+refsol(:,1) = experience1.Observation.GliderStates.Data(1:4,1);
 
 h = 0.05;
 for j=1:stepnumber
@@ -97,7 +97,7 @@ end
 figure
 % plot(experience1.Observation.GliderStates.Data(1,:),experience1.Observation.GliderStates.Data(2,:),'b')
 % hold on
-plot(experience0.Observation.GliderStates.Data(1,:),experience0.Observation.GliderStates.Data(2,:),'m')
+plot(experience1.Observation.GliderStates.Data(1,:),experience1.Observation.GliderStates.Data(2,:),'m')
 hold on
 plot(refsol(1,:),refsol(2,:),'--r')
 yline(0,'r')
@@ -122,7 +122,7 @@ end
 %----------------------------------
 function f = Glide(y)
     g=9.81;
-    muD=1.5*10^(-4); %Drag coeff 2
+    muD=1.0848*10^(-4); %Drag coeff 2
     muL=0.0077; %Lift coeff 2
 
 	f = zeros(4,1);
