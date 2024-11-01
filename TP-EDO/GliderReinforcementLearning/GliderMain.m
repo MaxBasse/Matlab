@@ -65,6 +65,6 @@ agent.AgentOptions.EpsilonGreedyExploration.EpsilonMin = 0.01;
 %getAction(agent,rand(obsInfo.Dimension))%
 %% step 3: training
 
-[Glider1,trainStats] = GliderTrain(agent,envA1);
+[Glider2,trainStats] = GliderTrain(agent,envA1);
 % saving the agent:
-save Glider1.mat Glider1
+save Glider2.mat Glider2

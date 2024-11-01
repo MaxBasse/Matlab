@@ -8,25 +8,44 @@ g = 9.81;
 
 %Sample time
 h=0.05;
-% Drag coefficient
-drag = 1.5*10^(-4);
 
-% Lift coefficient
-lift = 0.0077;
-
-% y treshold for the glider i.e. the glider should never go under y = 0
+% y treshold for the glider i.e. it should never go under y = 0
 yTreshold = 0;
 
-% x objective for the landing 
-xObjective = 300;
+% y maximum for the glider i.e it should stay under y=20
+yMaximum =20;
 
-% Reward each time step the glider is not landed yet
-%distV = abs(State(3)-24.4572);
-%distTheta = abs(State(4)+0.0078);
-RewardForLanding = ...
-    State(1)/(State(2)+0.001); %The smaller the altitude, bigger the reward
-% Penalty if the glider landed
-PenaltyForCrashing = -200000;
+% x minimum for the glider i.e it must crash after x = 400 
+xMinimum = 300;
+
+% theta maximum for the glider i.e how straight we want it to glide
+thetaMaximum =pi/6;
+
+%-----------
+
+%Variable to compute the reward
+Y = State(2);
+X=State(1);
+Theta = State(4);
+
+if X<250 && Y<yMaximum
+    RewardForLanding = X^2; %Rewarded for heading down at the beginning
+elseif Y<yMaximum   %If low altitude
+    if abs(Theta)<thetaMaximum %Rewarded only if not oscillating
+        RewardForLanding=X*1e4/(abs(Y)+0.01)^2;
+    else
+        RewardForLanding = -1e5/X^2; %or it's penalized
+    end
+else %If high altitude it's penalized
+    RewardForLanding=-X^2;
+end
+
+% If the glider crashed, it's rewarded only after a certain x
+if X<xMinimum
+    PenaltyForCrashing = -1e6*X;
+else
+    PenaltyForCrashing = X^2;
+end
 
 % Perform RK4 to calculate next state.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -36,8 +55,6 @@ NextState = RK4_2(g,h,Action,State);
 NextObs = NextState;
 
 % Check terminal condition.
-Y = NextObs(2);
-%Theta = NextObs(4);
 IsDone = Y < yTreshold;
 
 % Calculate reward.
@@ -85,5 +102,4 @@ function dy = rhs2(g,Action,State)
     dy(2) = State(3)*sin(State(4));
     dy(3) = -g*sin(State(4)) - Md(Action)*State(3)^2;
     dy(4) = -g*cos(State(4))/State(3) + Ml(Action)*State(3);
-    dy(5) = 0;
 end
