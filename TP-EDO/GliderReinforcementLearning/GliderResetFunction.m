@@ -1,16 +1,18 @@
 function [InitialObservation, InitialState] = GliderResetFunction()
 % Reset function to place custom glider environment into a random
 % initial state.
-%rng(106);%86 76
+
+%rng(76);86 76 106
+
 
 % X
 X0 = 0;
 % Y rand
-Y0 = 60 + randi([-3,3])*10;
+Y0 = 60 + randi([-1,2])*10;
 % V rand
-V0 = 10 + (rand-1/2)*10; %randi([-1,1])*10
+V0 = 10 + (rand-1/2)*10;
 % theta rand
-theta0 = randi([-9,9])*pi/36;
+theta0 = randi([-9,6])*pi/36; % [-45;30]°
 % wing
 wing0 = 2;
 

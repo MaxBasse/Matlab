@@ -19,74 +19,16 @@ simOptions = rlSimulationOptions(MaxSteps=stepnumber);
 load Glider2.mat
 load Glider6.mat
 experience1 = sim(testenv,Glider1,simOptions);
-totalReward1 = sum(experience1.Reward);
+totalReward1 = sum(experience1.Reward)
 
-%load agentA2.mat
-%experience2 = sim(testenv,agentA2,simOptions);
-%totalReward2 = sum(experience2.Reward)
-
-%% step 2(bis) : creating an agent and running a simulation
-
-%stepnumber=5000;
-%simOptions = rlSimulationOptions(MaxSteps=stepnumber);
-
-% agent
-obsInfo = getObservationInfo(testenv);
-actInfo = getActionInfo(testenv);
-
-dnn = [
-    featureInputLayer(prod(obsInfo.Dimension))
-    fullyConnectedLayer(32)
-    reluLayer
-    %fullyConnectedLayer(32)% added
-    %reluLayer
-    fullyConnectedLayer(32)
-    reluLayer
-    fullyConnectedLayer(numel(actInfo.Elements))
-    ];
-
-dnn = dlnetwork(dnn);
-summary(dnn)
-
-% Plot network
-plot(dnn)
-
-critic = rlVectorQValueFunction(dnn,obsInfo,actInfo);
-%getValue(critic,{rand(obsInfo.Dimension)})%
-criticOptions = rlOptimizerOptions( ...
-    LearnRate=0.02);
-    % GradientThreshold=Inf,...
-    % Algorithm="adam",...
-    % GradientThresholdMethod="l2norm",...
-    % L2RegularizationFactor=0.0001
-    %,...OptimizerParameters=!?
-    
-agentOptions = rlDQNAgentOptions(...
-    SampleTime=1, ... %BatchDataRegularizerOptions=x,...
-    CriticOptimizerOptions=criticOptions,...
-    DiscountFactor=0.99,...
-    ExperienceBufferLength=1e+04,... %InfoToSave=x,...
-    MiniBatchSize=64,... %NumStepsToLookAhead=x,...%ResetExperienceBufferBeforeTraining=x,...%SequenceLength=32,...
-    TargetSmoothFactor=0.001,...
-    TargetUpdateFrequency=1,...
-    UseDoubleDQN=true);
-
-%agentOptions
-
-agent = rlDQNAgent(critic,agentOptions);
-agent.AgentOptions.EpsilonGreedyExploration.Epsilon = 1;
-agent.AgentOptions.EpsilonGreedyExploration.EpsilonDecay = 0.005;
-agent.AgentOptions.EpsilonGreedyExploration.EpsilonMin = 0.01;
-
-%getAction(agent,rand(obsInfo.Dimension))%
-
-experience0 = sim(testenv,agent,simOptions);
-totalReward0 = sum(experience0.Reward);
+load Glider2.mat
+experience2 = sim(testenv,Glider2,simOptions);
+totalReward2 = sum(experience2.Reward);
 
 %% step 3: reference solution with fixed wings
 
 refsol = zeros(4,stepnumber+1); % MaxSteps=10000
-refsol(:,1) = experience1.Observation.GliderStates.Data(1:4,1);
+refsol(:,1) = experience2.Observation.GliderStates.Data(1:4,1);
 
 h = 0.05;
 for j=1:stepnumber
@@ -99,8 +41,10 @@ figure
 % plot(experience1.Observation.GliderStates.Data(1,:),experience1.Observation.GliderStates.Data(2,:),'b')
 % hold on
 plot(experience1.Observation.GliderStates.Data(1,:),experience1.Observation.GliderStates.Data(2,:),'m')
+%hold on
+%plot(refsol(1,:),refsol(2,:),'--r')
 hold on
-plot(refsol(1,:),refsol(2,:),'--r')
+plot(experience2.Observation.GliderStates.Data(1,:),experience2.Observation.GliderStates.Data(2,:),'--g')
 yline(0,'r')
 xlabel('x')
 ylabel('y')
