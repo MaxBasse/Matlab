@@ -16,7 +16,7 @@ testenv = rlFunctionEnv(ObsInfo,ActInfo,"GliderStepFunction","GliderResetFunctio
 stepnumber=3000;
 simOptions = rlSimulationOptions(MaxSteps=stepnumber);
 
-load Glider2.mat
+load Glider1.mat
 experience1 = sim(testenv,Glider1,simOptions);
 totalReward1 = sum(experience1.Reward);
 

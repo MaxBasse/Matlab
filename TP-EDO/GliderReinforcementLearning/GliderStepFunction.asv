@@ -18,15 +18,16 @@ lift = 0.0077;
 yTreshold = 0;
 
 % x objective for the landing 
-xObjective = 300;
+xObjective = 840;
 
 % Reward each time step the glider is not landed yet
 %distV = abs(State(3)-24.4572);
 %distTheta = abs(State(4)+0.0078);
-RewardForLanding = ...
-    State(1)/(State(2)+0.001); %The smaller the altitude, bigger the reward
+RewardForApproch = ...
+    ((xObjective-State(1))/xObjective)/(State(2)+0.001); %The smaller the altitude, bigger the reward
 % Penalty if the glider landed
 PenaltyForCrashing = -200000;
+RewardForLanding = 300000;
 
 % Perform RK4 to calculate next state.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -37,15 +38,22 @@ NextObs = NextState;
 
 % Check terminal condition.
 Y = NextObs(2);
+X = NextObs(1);
 %Theta = NextObs(4);
-IsDone = Y < yTreshold;
+IsDone = (Y <= yTreshold) | X > xObjective;
+Landed = (Y <= yTreshold) & (abs(NextObs(4)) < pi/4);
 
 % Calculate reward.
 if ~IsDone
-    Reward = RewardForLanding;
+    Reward = RewardForApproch
 else
-    Reward = PenaltyForCrashing;
+    if Landed
+        Reward = RewardForLanding
+    else
+        Reward = PenaltyForCrashing
+    end
 end
+
 end
 %----------------------------------
 function NextState = RK4_2(g,h,Action,State)
@@ -83,7 +91,7 @@ function dy = rhs2(g,Action,State)
     
     dy(1) = State(3)*cos(State(4));
     dy(2) = State(3)*sin(State(4));
-    dy(3) = -g*sin(State(4)) - Md(A)*State(3)^2;
+    dy(3) = -g*sin(State(4)) - Md(Action)*State(3)^2;
     dy(4) = -g*cos(State(4))/State(3) + Ml(Action)*State(3);
     dy(5) = 0;
 end
