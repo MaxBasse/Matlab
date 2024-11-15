@@ -2,14 +2,14 @@ clear
 clc
 %% step 1: creating the enviroment envA1
 
-ObsInfo = rlNumericSpec([5 1]);
+ObsInfo = rlNumericSpec([4 1]);
 ObsInfo.Name = "Glider States";
-ObsInfo.Description = 'x, y, v, theta, wing';%, ind, wch
+ObsInfo.Description = 'x, y, v, theta';%, ind, wch
 
-ActInfo = rlFiniteSetSpec([1 2 3 4 5 6 7]);
+ActInfo = rlFiniteSetSpec([1 4 7]);
 ActInfo.Name = "Glider Action";
 
-envA1 = rlFunctionEnv(ObsInfo,ActInfo,"GliderStepFunction","GliderResetFunction");
+envA1 = rlFunctionEnv(ObsInfo,ActInfo,"GliderNewStepFunction","GliderResetFunction");
 
 %% step 2: creating the agent
 
@@ -65,7 +65,13 @@ agent.AgentOptions.EpsilonGreedyExploration.EpsilonMin = 0.01;
 %getAction(agent,rand(obsInfo.Dimension))%
 %% step 3: training
 
+<<<<<<< Updated upstream
 [Glider2,trainStats] = GliderTrain(agent,envA1);
 
 save Glider2.mat Glider2
 
+=======
+[Glider4,trainStats] = GliderTrain(agent,envA1);
+% saving the agent:
+save Glider4.mat Glider4
+>>>>>>> Stashed changes
