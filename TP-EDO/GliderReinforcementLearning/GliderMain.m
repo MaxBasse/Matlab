@@ -65,13 +65,7 @@ agent.AgentOptions.EpsilonGreedyExploration.EpsilonMin = 0.01;
 %getAction(agent,rand(obsInfo.Dimension))%
 %% step 3: training
 
-<<<<<<< Updated upstream
-[Glider2,trainStats] = GliderTrain(agent,envA1);
-
-save Glider2.mat Glider2
-
-=======
-[Glider4,trainStats] = GliderTrain(agent,envA1);
+[Glider3,trainStats] = GliderTrain(agent,envA1);
 % saving the agent:
-save Glider4.mat Glider4
->>>>>>> Stashed changes
+save Glider3.mat Glider3
+

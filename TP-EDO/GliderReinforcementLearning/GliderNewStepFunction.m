@@ -14,7 +14,7 @@ yTreshold = 0;
 
 
 % y maximum for the glider i.e it should stay under y=20
-yMaximum =20;
+yMaximum =10;
 
 % x minimum for the glider i.e it must crash after x = 400 
 xMinimum = 210;
@@ -32,11 +32,8 @@ a = 5; k = 30;
 RewardForNotLanding = ...
 State(1)*distY*abs(1-State(4)) - k*max(0,(Action-k)*w);
 
-<<<<<<< Updated upstream:TP-EDO/GliderReinforcementLearning/GliderStepFunction.asv
-
-=======
 PenaltyForCrashing = -1e5;
->>>>>>> Stashed changes:TP-EDO/GliderReinforcementLearning/GliderNewStepFunction.m
+
 % Perform RK4 to calculate next state.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 NextState = RK4_2(g,h,Action,State);
@@ -45,29 +42,14 @@ NextState = RK4_2(g,h,Action,State);
 NextObs = NextState;
 
 % Check terminal condition.
-<<<<<<< Updated upstream:TP-EDO/GliderReinforcementLearning/GliderStepFunction.asv
 
-IsDone = Y < yTreshold;
-=======
 IsDone = NextState(2) < yTreshold;
->>>>>>> Stashed changes:TP-EDO/GliderReinforcementLearning/GliderNewStepFunction.m
-
 
 % Calculate reward.
 if ~IsDone
-<<<<<<< Updated upstream:TP-EDO/GliderReinforcementLearning/GliderStepFunction.asv
-    Reward = RewardForApproch
-else
-    if Landed
-        Reward = RewardForLanding
-    else
-        Reward = PenaltyForCrashing
-    end
-=======
     Reward = RewardForNotLanding;
 else
     Reward= PenaltyForCrashing;
->>>>>>> Stashed changes:TP-EDO/GliderReinforcementLearning/GliderNewStepFunction.m
 end
 
 end
