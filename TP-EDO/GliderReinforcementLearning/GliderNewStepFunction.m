@@ -1,4 +1,4 @@
-function [NextObs, Reward, IsDone, NextState] = GliderStepFunction(Action, State)
+function [NextObs, Reward, IsDone, NextState] = GliderNewStepFunction(Action, State)
 %Custom step function for the glider env, computes the pos for one step
 
 % Consts
@@ -14,39 +14,25 @@ yTreshold = 0;
 
 
 % y maximum for the glider i.e it should stay under y=20
-yMaximum =20;
+yMaximum =10;
 
 % x minimum for the glider i.e it must crash after x = 400 
-xMinimum = 300;
+xMinimum = 210;
 
 % theta maximum for the glider i.e how straight we want it to glide
-thetaMaximum =pi/6;
+thetaMaximum =1.2;
 
 %-----------
 
 %Variable to compute the reward
-Y = State(2);
-X=State(1);
-Theta = State(4);
+distY = yMaximum-State(2);
+distTheta = abs(State(4)-thetaMaximum);
+w = sign(abs(2-Action));
+a = 5; k = 30;
+RewardForNotLanding = ...
+State(1)*distY*abs(1-State(4)) - k*max(0,(Action-k)*w);
 
-if X<250 && Y<yMaximum
-    RewardForLanding = X^2; %Rewarded for heading down at the beginning
-elseif Y<yMaximum   %If low altitude
-    if abs(Theta)<thetaMaximum %Rewarded only if not oscillating
-        RewardForLanding=X*1e4/(abs(Y)+0.01)^2;
-    else
-        RewardForLanding = -1e5/X^2;
-    end
-else
-    RewardForLanding=-X^2;
-end
-% If the glider crashed, it's rewarded only after a certain x
-if State(1)<xMinimum
-    PenaltyForCrashing = -1e6*X;
-else
-    PenaltyForCrashing = X^2;
-end
-
+PenaltyForCrashing = -1e5;
 
 % Perform RK4 to calculate next state.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,18 +43,13 @@ NextObs = NextState;
 
 % Check terminal condition.
 
-IsDone = Y < yTreshold;
-
+IsDone = NextState(2) < yTreshold;
 
 % Calculate reward.
 if ~IsDone
-    Reward = RewardForApproch
+    Reward = RewardForNotLanding;
 else
-    if Landed
-        Reward = RewardForLanding
-    else
-        Reward = PenaltyForCrashing
-    end
+    Reward= PenaltyForCrashing;
 end
 
 end
@@ -85,7 +66,6 @@ function NextState = RK4_2(g,h,Action,State)
     k4=rhs2(g,Action,Y4);
     Y=State+h*(k1+2*k2+2*k3+k4)/6;
     NextState=Y;
-    NextState(5)=Action;
 end
 %----------------------------------
 function dy = rhs2(g,Action,State)
@@ -104,7 +84,7 @@ function dy = rhs2(g,Action,State)
         0.0202
         0.0229
         0.0265];
-    dy = zeros(5,1);
+    dy = zeros(4,1);
     
     dy(1) = State(3)*cos(State(4));
     dy(2) = State(3)*sin(State(4));
