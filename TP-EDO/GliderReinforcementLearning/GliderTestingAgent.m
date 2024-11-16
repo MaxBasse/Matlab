@@ -17,33 +17,26 @@ testenv3 = rlFunctionEnv(ObsInfo,ActInfo,"GliderNewStepFunction","GliderResetFun
 stepnumber=3000;
 simOptions = rlSimulationOptions(MaxSteps=stepnumber);
 
-<<<<<<< Updated upstream
-load Glider2.mat
-load Glider6.mat
-experience1 = sim(testenv,Glider1,simOptions);
-totalReward1 = sum(experience1.Reward)
-=======
 %load Glider1.mat
 %experience1 = sim(testenv,Glider1,simOptions);
 %totalReward1 = sum(experience1.Reward)
->>>>>>> Stashed changes
 
 %load Glider2.mat
 %experience2 = sim(testenv,Glider2,simOptions);
 %totalReward2 = sum(experience2.Reward)
 
+load Glider4.mat
+experience4= sim(testenv3,Glider4,simOptions);
+totalReward4 = sum(experience4.Reward)
+
 load Glider3.mat
 experience3 = sim(testenv3,Glider3,simOptions);
 totalReward3 = sum(experience3.Reward)
 
-load Glider4.mat
-experience4 = sim(testenv3,Glider4,simOptions);
-totalReward3 = sum(experience4.Reward)
-
 %% step 3: reference solution with fixed wings
 
 refsol = zeros(4,stepnumber+1); % MaxSteps=10000
-refsol(:,1) = experience3.Observation.GliderStates.Data(1:4,1);
+refsol(:,1) = experience4.Observation.GliderStates.Data(1:4,1);
 
 h = 0.05;
 for j=1:stepnumber
@@ -63,12 +56,13 @@ figure
 hold on
 plot(experience3.Observation.GliderStates.Data(1,:),experience3.Observation.GliderStates.Data(2,:),'b')
 hold on
-plot(experience4.Observation.GliderStates.Data(1,:),experience4.Observation.GliderStates.Data(2,:),'g')
+%plot(experience4.Observation.GliderStates.Data(1,:),experience4.Observation.GliderStates.Data(2,:),'g')
 yline(0,'r')
-yline(20,'--b')
+yline(10,'--b')
 xlabel('x')
 ylabel('y')
 hold off
+%plot(experience3.Observation.GliderStates.Data(1,:),experience3.Observation.GliderStates.Data(3,:),'b')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %----------------------------------
