@@ -9,7 +9,7 @@ ObsInfo.Description = 'x, y, v, theta';%, ind, wch
 ActInfo = rlFiniteSetSpec([1 4 7]);
 ActInfo.Name = "Glider Action";
 
-envA1 = rlFunctionEnv(ObsInfo,ActInfo,"GliderNewStepFunction","GliderResetFunction");
+envA1 = rlFunctionEnv(ObsInfo,ActInfo,"GliderNewStepFunction2","GliderResetFunction");
 
 %% step 2: creating the agent
 
@@ -67,5 +67,5 @@ agent.AgentOptions.EpsilonGreedyExploration.EpsilonMin = 0.01;
 
 [Glider3,trainStats] = GliderTrain(agent,envA1);
 % saving the agent:
-save Glider3.mat Glider3
+save Glider5.mat Glider3
 
